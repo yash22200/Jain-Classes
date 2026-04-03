@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Menu, X, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/MockAuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = ["Home", "About", "Courses", "Batches", "Results", "Contact"];
 

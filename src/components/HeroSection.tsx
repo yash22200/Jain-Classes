@@ -1,5 +1,6 @@
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import heroImg from "@/assets/hero-classroom.jpg";
 
 const HeroSection = () => (
@@ -24,10 +25,14 @@ const HeroSection = () => (
         </p>
 
         <div className="flex flex-wrap gap-3 mb-8">
-          <Button size="lg">Enroll Now</Button>
-          <Button variant="outline" size="lg">
-            <Play className="w-4 h-4 mr-2" /> Watch Demo
-          </Button>
+          <Link to="/signup">
+            <Button size="lg">Enroll Now</Button>
+          </Link>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="lg">
+              <Play className="w-4 h-4 mr-2" /> Watch Demo
+            </Button>
+          </a>
         </div>
 
         <div className="flex items-center gap-3 text-sm text-muted-foreground">

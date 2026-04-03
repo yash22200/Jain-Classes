@@ -9,7 +9,10 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
-import { MockAuthProvider } from "@/context/MockAuthContext";
+
+import { AuthProvider } from "@/context/AuthContext";
+import { NotificationProvider } from "@/context/NotificationContext";
+import { GradeProvider } from "@/context/GradeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -19,9 +22,11 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <MockAuthProvider>
-        <BrowserRouter>
-          <Routes>
+      <AuthProvider>
+        <NotificationProvider>
+          <GradeProvider>
+            <BrowserRouter>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
@@ -43,11 +48,14 @@ const App = () => (
               }
             />
 
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </MockAuthProvider>
+            </BrowserRouter>
+          </GradeProvider>
+        </NotificationProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
