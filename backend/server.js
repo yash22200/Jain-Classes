@@ -13,20 +13,8 @@ connectDB();
 const app = express();
 
 // ─── Middleware ────────────────────────────────────────────
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "http://localhost:8080",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:8080",
-];
-// Add production frontend URL from env if set
-if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
-}
-
 app.use(cors({
-  origin: allowedOrigins,
+  origin: "*",
   credentials: true,
 }));
 app.use(express.json());
