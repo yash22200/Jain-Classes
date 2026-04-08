@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import { API_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import {
@@ -125,12 +126,12 @@ const AdminDashboard = () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [resStud, resEnq, resRes, resHw, resResource, resQuiz] = await Promise.all([
-        fetch("http://localhost:5000/api/admin/students", { headers }).then(r => r.json()),
-        fetch("http://localhost:5000/api/admin/enquiries", { headers }).then(r => r.json()),
-        fetch("http://localhost:5000/api/admin/results", { headers }).then(r => r.json()),
-        fetch("http://localhost:5000/api/admin/homeworks", { headers }).then(r => r.json()),
-        fetch("http://localhost:5000/api/admin/resources", { headers }).then(r => r.json()),
-        fetch("http://localhost:5000/api/admin/quizzes", { headers }).then(r => r.json())
+        fetch(`${API_URL}/api/admin/students`, { headers }).then(r => r.json()),
+        fetch(`${API_URL}/api/admin/enquiries`, { headers }).then(r => r.json()),
+        fetch(`${API_URL}/api/admin/results`, { headers }).then(r => r.json()),
+        fetch(`${API_URL}/api/admin/homeworks`, { headers }).then(r => r.json()),
+        fetch(`${API_URL}/api/admin/resources`, { headers }).then(r => r.json()),
+        fetch(`${API_URL}/api/admin/quizzes`, { headers }).then(r => r.json())
       ]);
 
       if (resStud.success) setStudents(resStud.data);
@@ -147,7 +148,7 @@ const AdminDashboard = () => {
   const addStudent = async () => {
     if (newStudent.name && newStudent.email) {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/students", {
+        const res = await fetch(`${API_URL}/api/admin/students`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -178,7 +179,7 @@ const AdminDashboard = () => {
 
   const deleteStudent = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/students/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/students/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -197,7 +198,7 @@ const AdminDashboard = () => {
   const addResult = async () => {
     if (newResult.studentId && newResult.subject && newResult.marks) {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/results", {
+        const res = await fetch(`${API_URL}/api/admin/results`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -229,7 +230,7 @@ const AdminDashboard = () => {
   const markEnquiryAsReviewed = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === "new" ? "reviewed" : "responded";
-      const res = await fetch(`http://localhost:5000/api/admin/enquiries/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/enquiries/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -252,7 +253,7 @@ const AdminDashboard = () => {
   const addResource = async () => {
     if (newResource.title && newResource.url) {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/resources", {
+        const res = await fetch(`${API_URL}/api/admin/resources`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -278,7 +279,7 @@ const AdminDashboard = () => {
 
   const deleteResource = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/resources/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/resources/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -300,7 +301,7 @@ const AdminDashboard = () => {
         return toast({ title: "Error", description: "Please fill all question texts and options", variant: "destructive" });
       }
       try {
-        const res = await fetch("http://localhost:5000/api/admin/quizzes", {
+        const res = await fetch(`${API_URL}/api/admin/quizzes`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -326,7 +327,7 @@ const AdminDashboard = () => {
 
   const deleteQuiz = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/quizzes/${id}`, {
+      const res = await fetch(`${API_URL}/api/admin/quizzes/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -571,7 +572,7 @@ const AdminDashboard = () => {
                         <p className="text-xs text-muted-foreground">{hw.grade} - {hw.subject}</p>
                       </div>
                       <div className="text-right">
-                        <a href={`http://localhost:5000/${hw.filePath.replace(/\\/g, "/")}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`${API_URL}/${hw.filePath.replace(/\\/g, "/")}`} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" variant="outline">View PDF</Button>
                         </a>
                       </div>
@@ -909,7 +910,7 @@ const AdminDashboard = () => {
                         {new Date(hw.date).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <a href={`http://localhost:5000/${hw.filePath.replace(/\\/g, "/")}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`${API_URL}/${hw.filePath.replace(/\\/g, "/")}`} target="_blank" rel="noopener noreferrer">
                           <Button size="sm" className="w-full max-w-xs">
                             <Eye className="w-4 h-4 mr-2" /> View PDF
                           </Button>

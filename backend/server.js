@@ -13,8 +13,20 @@ connectDB();
 const app = express();
 
 // ─── Middleware ────────────────────────────────────────────
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:8080",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:8080",
+];
+// Add production frontend URL from env if set
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000", "http://localhost:8080", "http://127.0.0.1:5173", "http://127.0.0.1:8080"],
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
@@ -24,8 +36,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ─── Routes ───────────────────────────────────────────────
-app.use("/api/auth",    require("./routes/authRoutes"));
-app.use("/api/admin",   require("./routes/adminRoutes"));
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 app.use("/api/enquiry", require("./routes/enquiryRoutes"));
 

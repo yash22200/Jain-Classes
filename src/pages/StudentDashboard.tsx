@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import { API_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import {
@@ -118,11 +119,11 @@ const StudentDashboard = () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [resProfile, resResults, resHomework, resResource, resQuiz] = await Promise.all([
-        fetch("http://localhost:5000/api/student/profile", { headers }).then((res) => res.json()),
-        fetch("http://localhost:5000/api/student/results", { headers }).then((res) => res.json()),
-        fetch("http://localhost:5000/api/student/homework", { headers }).then((res) => res.json()),
-        fetch("http://localhost:5000/api/student/resources", { headers }).then((res) => res.json()),
-        fetch("http://localhost:5000/api/student/quizzes", { headers }).then((res) => res.json()),
+        fetch(`${API_URL}/api/student/profile`, { headers }).then((res) => res.json()),
+        fetch(`${API_URL}/api/student/results`, { headers }).then((res) => res.json()),
+        fetch(`${API_URL}/api/student/homework`, { headers }).then((res) => res.json()),
+        fetch(`${API_URL}/api/student/resources`, { headers }).then((res) => res.json()),
+        fetch(`${API_URL}/api/student/quizzes`, { headers }).then((res) => res.json()),
       ]);
 
       if (resProfile.success) setProfile(resProfile.data);
@@ -147,7 +148,7 @@ const StudentDashboard = () => {
       formData.append("subject", newHomework.subject);
       formData.append("file", newHomework.file);
 
-      const res = await fetch("http://localhost:5000/api/student/homework", {
+      const res = await fetch(`${API_URL}/api/student/homework`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -201,7 +202,7 @@ const StudentDashboard = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       };
-      const res = await fetch("http://localhost:5000/api/student/courses/enroll", {
+      const res = await fetch(`${API_URL}/api/student/courses/enroll`, {
         method: "POST",
         headers,
         body: JSON.stringify({ courseName })
@@ -226,7 +227,7 @@ const StudentDashboard = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       };
-      const res = await fetch(`http://localhost:5000/api/student/quizzes/${quizId}/attempt`, {
+      const res = await fetch(`${API_URL}/api/student/quizzes/${quizId}/attempt`, {
         method: "POST",
         headers,
         body: JSON.stringify({ answers: quizAnswers })

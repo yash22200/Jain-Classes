@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_URL } from "@/lib/api";
 import { MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ const ContactSection = () => {
     
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/enquiry", {
+      const res = await fetch(`${API_URL}/api/enquiry`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
