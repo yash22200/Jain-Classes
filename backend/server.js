@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const helmet = require("helmet");
 const connectDB = require("./config/db");
 
 // Load env vars
@@ -13,8 +14,9 @@ connectDB();
 const app = express();
 
 // ─── Middleware ────────────────────────────────────────────
+app.use(helmet());
 app.use(cors({
-  origin: "*",
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true,
 }));
 app.use(express.json());
@@ -28,6 +30,7 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/student", require("./routes/studentRoutes"));
 app.use("/api/enquiry", require("./routes/enquiryRoutes"));
+app.use("/api/config", require("./routes/configRoutes"));
 
 // ─── Health check ─────────────────────────────────────────
 app.get("/api/health", (req, res) => {
@@ -38,9 +41,13 @@ app.get("/api/health", (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const status = err.status || 500;
+  // Don't expose implementation details in production
+  const message = process.env.NODE_ENV === "production" 
+    ? "An error occurred. Please try again later."
+    : err.message || "Internal Server Error";
   res.status(status).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message,
   });
 });
 

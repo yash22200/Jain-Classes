@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
-import { API_URL } from "@/lib/api";
+import { API_URL, configAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import {
@@ -79,18 +79,12 @@ interface Quiz {
   createdAt: string;
 }
 
-const AVAILABLE_COURSES = [
-  "Mathematics Core",
-  "Advanced Physics",
-  "Chemistry Basics",
-  "Biology Foundation",
-  "JEE Crash Course",
-  "NEET Prep",
-  "English Literature",
-  "Computer Science Intro",
-  "Accountancy Advanced",
-  "Economics Principles"
-];
+interface Course {
+  id: string;
+  name: string;
+  description: string;
+  duration: string;
+}
 
 const StudentDashboard = () => {
   const { user, token, logout } = useAuth();
@@ -98,6 +92,7 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "courses" | "results" | "resources" | "homework" | "quizzes">("overview");
 
   const [profile, setProfile] = useState<StudentProfile | null>(null);
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [results, setResults] = useState<StudentResult[]>([]);
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -112,8 +107,24 @@ const StudentDashboard = () => {
   useEffect(() => {
     if (token) {
       fetchDashboardData();
+      fetchAvailableCourses();
     }
   }, [token]);
+
+  const fetchAvailableCourses = async () => {
+    try {
+      const courses = await configAPI.getCourses();
+      setAvailableCourses(courses);
+    } catch (error) {
+      console.error("Error fetching available courses:", error);
+      // Use fallback courses
+      setAvailableCourses([
+        { id: "1", name: "8th Standard", description: "8th standard curriculum", duration: "10 Months" },
+        { id: "2", name: "9th Standard", description: "9th standard curriculum", duration: "10 Months" },
+        { id: "3", name: "10th Standard (Board Prep)", description: "Board preparation", duration: "10 Months" },
+      ]);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -448,20 +459,20 @@ const StudentDashboard = () => {
             <div>
               <h2 className="text-2xl font-bold mb-4">Available Courses</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {AVAILABLE_COURSES.filter(c => !profile?.enrolledCourses?.includes(c)).map((course, idx) => (
-                  <div key={idx} className="bg-card rounded-lg border p-6 space-y-4 flex flex-col justify-between">
+                {availableCourses.filter(c => !profile?.enrolledCourses?.includes(c.name)).map((course) => (
+                  <div key={course.id} className="bg-card rounded-lg border p-6 space-y-4 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg">{course}</h3>
+                      <h3 className="font-semibold text-lg">{course.name}</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Enhance your learning with our comprehensive curriculum for {course}.
+                        {course.description}
                       </p>
                     </div>
-                    <Button className="w-full mt-4" onClick={() => enrollCourse(course)}>
+                    <Button className="w-full mt-4" onClick={() => enrollCourse(course.name)}>
                       Enroll Now
                     </Button>
                   </div>
                 ))}
-                {AVAILABLE_COURSES.filter(c => !profile?.enrolledCourses?.includes(c)).length === 0 && (
+                {availableCourses.filter(c => !profile?.enrolledCourses?.includes(c.name)).length === 0 && (
                   <div className="col-span-full py-8 text-center text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
                     <p>You have enrolled in all available courses!</p>
                   </div>

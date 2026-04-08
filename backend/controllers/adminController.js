@@ -36,7 +36,12 @@ const getAllStudents = async (req, res) => {
 // @route POST /api/admin/students
 const addStudent = async (req, res) => {
   try {
-    const { name, email, password = "student123", enrolledCourses, phone, class: studentClass } = req.body;
+    const { name, email, password, enrolledCourses, phone, class: studentClass } = req.body;
+    
+    // Password is required and must meet minimum security requirements
+    if (!password || password.length < 8) {
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters long" });
+    }
 
     if (!name || !email) {
       return res.status(400).json({ success: false, message: "Name and email are required" });
