@@ -36,7 +36,7 @@ const getAllStudents = async (req, res) => {
 // @route POST /api/admin/students
 const addStudent = async (req, res) => {
   try {
-    const { name, email, password, enrolledCourses, phone, class: studentClass } = req.body;
+    const { name, email, password, enrolledCourses, phone, class: studentClass, status } = req.body;
     
     // Password is required and must meet minimum security requirements
     if (!password || password.length < 8) {
@@ -45,6 +45,17 @@ const addStudent = async (req, res) => {
 
     if (!name || !email) {
       return res.status(400).json({ success: false, message: "Name and email are required" });
+    }
+
+    // Validate phone
+    if (!phone) {
+      return res.status(400).json({ success: false, message: "Phone number is required" });
+    }
+
+    // Validate status
+    const validStatus = ["active", "inactive"];
+    if (status && !validStatus.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status value" });
     }
 
     const exists = await User.findOne({ email });
@@ -59,6 +70,7 @@ const addStudent = async (req, res) => {
       class: studentClass || "10th",
       phone: phone || "",
       enrolledCourses: enrolledCourses || [],
+      status: status || "active",
     });
 
     res.status(201).json({
@@ -68,8 +80,11 @@ const addStudent = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         class: student.class,
         enrolledCourses: student.enrolledCourses,
+        status: student.status,
+        joinDate: student.joinDate,
       },
     });
   } catch (error) {

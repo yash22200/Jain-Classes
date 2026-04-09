@@ -111,7 +111,15 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "students" | "enquiries" | "results" | "homeworks" | "notifications" | "resources" | "quizzes">("overview");
   const [newNotification, setNewNotification] = useState("");
   const { sendNotification, notifications } = useNotifications();
-  const [newStudent, setNewStudent] = useState({ name: "", email: "", course: "" });
+  const [newStudent, setNewStudent] = useState({ 
+    name: "", 
+    email: "", 
+    password: "",
+    phone: "",
+    class: "10th", 
+    enrolledCourses: "",
+    status: "active" as "active" | "inactive"
+  });
   const [newResult, setNewResult] = useState({ studentId: "", subject: "", marks: "", totalMarks: "100" });
   const [newResource, setNewResource] = useState({ title: "", url: "", description: "", type: "video", grade: "" });
   const [newQuiz, setNewQuiz] = useState({ title: "", description: "", course: "", questions: [{ questionText: "", options: ["", "", "", ""], correctOption: 0 }] });
@@ -146,34 +154,71 @@ const AdminDashboard = () => {
   };
 
   const addStudent = async () => {
-    if (newStudent.name && newStudent.email) {
-      try {
-        const res = await fetch(`${API_URL}/api/admin/students`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: newStudent.name,
-            email: newStudent.email,
-            class: newStudent.course,
-            enrolledCourses: newStudent.course ? [newStudent.course] : ["General"],
-          }),
+    // Validation
+    if (!newStudent.name || !newStudent.email || !newStudent.password || !newStudent.phone) {
+      toast({ title: "Error", description: "Please fill all required fields (Name, Email, Password, Phone)", variant: "destructive" });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newStudent.email)) {
+      toast({ title: "Error", description: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
+
+    // Password validation
+    if (newStudent.password.length < 8) {
+      toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
+
+    // Phone validation
+    const phoneRegex = /^[+]?[0-9\s\-()]{10,}$/;
+    if (!phoneRegex.test(newStudent.phone)) {
+      toast({ title: "Error", description: "Please enter a valid phone number", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const coursesArray = newStudent.enrolledCourses
+        ? newStudent.enrolledCourses.split(",").map(c => c.trim()).filter(c => c)
+        : [];
+
+      const res = await fetch(`${API_URL}/api/admin/students`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: newStudent.name.trim(),
+          email: newStudent.email.trim(),
+          password: newStudent.password,
+          phone: newStudent.phone.trim(),
+          class: newStudent.class,
+          enrolledCourses: coursesArray.length > 0 ? coursesArray : ["General"],
+          status: newStudent.status,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Success", description: "Student added successfully" });
+        setNewStudent({ 
+          name: "", 
+          email: "", 
+          password: "",
+          phone: "",
+          class: "10th", 
+          enrolledCourses: "",
+          status: "active"
         });
-        const data = await res.json();
-        if (data.success) {
-          toast({ title: "Success", description: "Student added correctly" });
-          setNewStudent({ name: "", email: "", course: "" });
-          fetchData(); 
-        } else {
-          toast({ title: "Error", description: data.message, variant: "destructive" });
-        }
-      } catch (err: any) {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
+        fetchData(); 
+      } else {
+        toast({ title: "Error", description: data.message, variant: "destructive" });
       }
-    } else {
-      toast({ title: "Error", description: "Please enter name and email", variant: "destructive" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
   };
 
@@ -441,34 +486,77 @@ const AdminDashboard = () => {
                     <span>Add Student</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Add New Student</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label>Name</Label>
+                      <Label>Name *</Label>
                       <Input
-                        placeholder="Student name"
+                        placeholder="John Doe"
                         value={newStudent.name}
                         onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
                       />
                     </div>
                     <div>
-                      <Label>Email</Label>
+                      <Label>Email *</Label>
                       <Input
+                        type="email"
                         placeholder="student@example.com"
                         value={newStudent.email}
                         onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
                       />
                     </div>
                     <div>
-                      <Label>Course / Grade</Label>
+                      <Label>Password * (min 8 characters)</Label>
                       <Input
-                        placeholder="8th Grade, Mathematics"
-                        value={newStudent.course}
-                        onChange={(e) => setNewStudent({ ...newStudent, course: e.target.value })}
+                        type="password"
+                        placeholder="Enter password"
+                        value={newStudent.password}
+                        onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
                       />
+                    </div>
+                    <div>
+                      <Label>Phone Number *</Label>
+                      <Input
+                        placeholder="+91 98164 43210"
+                        value={newStudent.phone}
+                        onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Class</Label>
+                      <select
+                        value={newStudent.class}
+                        onChange={(e) => setNewStudent({ ...newStudent, class: e.target.value })}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="8th">8th</option>
+                        <option value="9th">9th</option>
+                        <option value="10th">10th</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Enrolled Courses (comma-separated)</Label>
+                      <Input
+                        placeholder="e.g., JEE, NEET, State Board"
+                        value={newStudent.enrolledCourses}
+                        onChange={(e) => setNewStudent({ ...newStudent, enrolledCourses: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <select
+                        value={newStudent.status}
+                        onChange={(e) => setNewStudent({ ...newStudent, status: e.target.value as "active" | "inactive" })}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
                     </div>
                     <Button onClick={addStudent} className="w-full">
                       Add Student
@@ -635,34 +723,77 @@ const AdminDashboard = () => {
                     <Plus className="w-4 h-4 mr-2" /> Add Student
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Add New Student</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>
-                      <Label>Name</Label>
+                      <Label>Name *</Label>
                       <Input
-                        placeholder="Student name"
+                        placeholder="John Doe"
                         value={newStudent.name}
                         onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
                       />
                     </div>
                     <div>
-                      <Label>Email</Label>
+                      <Label>Email *</Label>
                       <Input
+                        type="email"
                         placeholder="student@example.com"
                         value={newStudent.email}
                         onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
                       />
                     </div>
                     <div>
-                      <Label>Course / Grade</Label>
+                      <Label>Password * (min 8 characters)</Label>
                       <Input
-                        placeholder="8th Grade, Mathematics"
-                        value={newStudent.course}
-                        onChange={(e) => setNewStudent({ ...newStudent, course: e.target.value })}
+                        type="password"
+                        placeholder="Enter password"
+                        value={newStudent.password}
+                        onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
                       />
+                    </div>
+                    <div>
+                      <Label>Phone Number *</Label>
+                      <Input
+                        placeholder="+91 98164 43210"
+                        value={newStudent.phone}
+                        onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Class</Label>
+                      <select
+                        value={newStudent.class}
+                        onChange={(e) => setNewStudent({ ...newStudent, class: e.target.value })}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="8th">8th</option>
+                        <option value="9th">9th</option>
+                        <option value="10th">10th</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Enrolled Courses (comma-separated)</Label>
+                      <Input
+                        placeholder="e.g., JEE, NEET, State Board"
+                        value={newStudent.enrolledCourses}
+                        onChange={(e) => setNewStudent({ ...newStudent, enrolledCourses: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Status</Label>
+                      <select
+                        value={newStudent.status}
+                        onChange={(e) => setNewStudent({ ...newStudent, status: e.target.value as "active" | "inactive" })}
+                        className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
                     </div>
                     <Button onClick={addStudent} className="w-full">
                       Add Student
@@ -672,13 +803,16 @@ const AdminDashboard = () => {
               </Dialog>
             </div>
 
-            <div className="bg-card rounded-lg border overflow-hidden">
+            <div className="bg-card rounded-lg border overflow-x-auto">
               <table className="w-full">
                 <thead className="border-b bg-muted/50">
                   <tr>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold">Grade / Enrolled</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Email</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Phone</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Class</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Enrolled Courses</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Join Date</th>
                     <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
                   </tr>
@@ -687,17 +821,29 @@ const AdminDashboard = () => {
                   {students.map((student) => (
                     <tr key={student.id} className="border-b hover:bg-muted/50 transition">
                       <td className="px-6 py-4 text-sm font-medium">{student.name}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">{student.email}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {(student as any).phone || "N/A"}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium">{student.class || "N/A"}</td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="font-semibold mr-2">{student.class || "N/A"}</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
+                        <div className="flex flex-wrap gap-1">
                           {student.enrolledCourses?.map((course, i) => (
-                            <span key={i} className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">
+                            <span key={i} className="bg-primary/10 text-primary px-2 py-1 rounded text-xs whitespace-nowrap">
                               {course}
                             </span>
                           ))}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">{student.email}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          student.status === "active" 
+                            ? "bg-green-100 text-green-800" 
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                          {student.status}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">
                         {new Date(student.joinDate).toLocaleDateString()}
                       </td>
@@ -715,7 +861,7 @@ const AdminDashboard = () => {
                   ))}
                   {students.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="text-center py-4 text-muted-foreground">No students found</td>
+                      <td colSpan={8} className="text-center py-4 text-muted-foreground">No students found</td>
                     </tr>
                   )}
                 </tbody>
