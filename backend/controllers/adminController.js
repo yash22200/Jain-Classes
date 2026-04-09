@@ -11,20 +11,34 @@ const Quiz = require("../models/Quiz");
 // @route GET /api/admin/students
 const getAllStudents = async (req, res) => {
   try {
-    const students = await User.find({ role: "student" }).select("-password");
-    const studentProfiles = await Student.find().populate("userId", "name email createdAt");
+    // Get all users with role "student"
+    const studentUsers = await User.find({ role: "student" }).select("-password").sort({ createdAt: -1 });
+    
+    // Get all student profiles
+    const studentProfiles = await Student.find();
 
-    const merged = studentProfiles.map((sp) => ({
-      id: sp.userId._id,
-      name: sp.userId.name,
-      email: sp.userId.email,
-      class: sp.class,
-      phone: sp.phone,
-      enrolledCourses: sp.enrolledCourses,
-      joinDate: sp.joinDate,
-      status: sp.status,
-      rollNumber: sp.rollNumber,
-    }));
+    // Create a map of userId -> Student profile for quick lookup
+    const profileMap = {};
+    studentProfiles.forEach((sp) => {
+      profileMap[sp.userId.toString()] = sp;
+    });
+
+    // Merge user data with student profile data
+    const merged = studentUsers.map((user) => {
+      const profile = profileMap[user._id.toString()];
+      
+      return {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || profile?.phone || "N/A",
+        class: profile?.class || "10th",
+        enrolledCourses: profile?.enrolledCourses || ["General"],
+        joinDate: profile?.joinDate || user.createdAt,
+        status: profile?.status || "active",
+        rollNumber: profile?.rollNumber || "",
+      };
+    });
 
     res.json({ success: true, data: merged });
   } catch (error) {
