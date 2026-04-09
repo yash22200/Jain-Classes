@@ -2,8 +2,9 @@ const User = require("../models/User");
 const Student = require("../models/Student");
 const jwt = require("jsonwebtoken");
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
+// Generate JWT with both id AND role for security
+const generateToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
 };
 
 // @desc  Register new user
@@ -33,7 +34,7 @@ const register = async (req, res) => {
     // Create student profile automatically
     await Student.create({ userId: user._id });
 
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, user.role);
 
     res.status(201).json({
       success: true,
@@ -56,7 +57,7 @@ const register = async (req, res) => {
 // @access Public
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, expectedRole } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: "Please provide email and password" });
@@ -72,7 +73,16 @@ const login = async (req, res) => {
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = generateToken(user._id);
+    // If the frontend sends an expectedRole, validate it matches the user's actual role
+    // This prevents a student from accidentally logging into the admin panel or vice versa
+    if (expectedRole && user.role !== expectedRole) {
+      return res.status(403).json({
+        success: false,
+        message: `This account is registered as a ${user.role}. Please select the correct role tab.`,
+      });
+    }
+
+    const token = generateToken(user._id, user.role);
 
     res.json({
       success: true,
@@ -90,11 +100,21 @@ const login = async (req, res) => {
   }
 };
 
-// @desc  Get current logged-in user
+// @desc  Get current logged-in user (validate token)
 // @route GET /api/auth/me
 // @access Private
 const getMe = async (req, res) => {
   try {
+    // req.user is set by the protect middleware after verifying the token
+    // Double-check that the token's role claim matches the DB role
+    const tokenRole = req.tokenRole; // Set by updated protect middleware
+    if (tokenRole && tokenRole !== req.user.role) {
+      return res.status(401).json({
+        success: false,
+        message: "Token role mismatch. Please login again.",
+      });
+    }
+
     res.json({
       success: true,
       data: {
@@ -109,4 +129,20 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe };
+// @desc  Logout user (clear session tracking)
+// @route POST /api/auth/logout
+// @access Private
+const logout = async (req, res) => {
+  try {
+    // With JWT, logout is primarily client-side (discard the token).
+    // This endpoint exists for frontend consistency and future token blacklisting.
+    res.json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { register, login, getMe, logout };

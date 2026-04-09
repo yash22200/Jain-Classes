@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GraduationCap, AtSign, Lock, Eye, EyeOff, User, Phone, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,19 +16,30 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { register } = useAuth();
+  const { register, user: currentUser } = useAuth();
   const navigate = useNavigate();
+
+  // If already logged in, redirect to dashboard
+  useEffect(() => {
+    if (currentUser) {
+      navigate(currentUser.role === "admin" ? "/admin" : "/student", { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
     try {
-      await register(name, email, password, confirm);
-      // after signup, route to student dashboard
-      navigate("/student", { replace: true });
+      const registeredUser = await register(name, email, password, confirm);
+      // Navigate based on the returned user's role
+      navigate(registeredUser.role === "admin" ? "/admin" : "/student", { replace: true });
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,8 +162,8 @@ const Signup = () => {
 
           {/* Submit */}
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" className="w-full h-12 text-base font-semibold gap-2" size="lg">
-            Create Account <UserPlus className="w-5 h-5" />
+          <Button type="submit" className="w-full h-12 text-base font-semibold gap-2" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Creating Account..." : <>Create Account <UserPlus className="w-5 h-5" /></>}
           </Button>
 
           {/* Divider */}

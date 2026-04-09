@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { GraduationCap, AtSign, Lock, Eye, EyeOff, LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
+import { GraduationCap, AtSign, Lock, Eye, EyeOff, LogIn, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,25 +13,42 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // If already logged in, redirect to the appropriate dashboard
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/student", { replace: true });
+      }
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
+
     try {
-      await login(email, password);
-      // redirect based on role stored in localStorage or auth context
-      const stored = localStorage.getItem("user");
-      const user = stored ? JSON.parse(stored) : null;
-      if (user?.role === "admin") {
+      // Pass the selected role tab so the backend can validate it
+      // The `login` function returns the user object directly — no localStorage read needed
+      const loggedInUser = await login(email, password, role);
+
+      // Navigate based on the RETURNED user's actual role (from backend, not from UI state)
+      if (loggedInUser.role === "admin") {
         navigate("/admin", { replace: true });
       } else {
         navigate("/student", { replace: true });
       }
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -76,7 +93,11 @@ const Login = () => {
             {(["student", "admin"] as const).map((r) => (
               <button
                 key={r}
-                onClick={() => setRole(r)}
+                type="button"
+                onClick={() => {
+                  setRole(r);
+                  setError(null); // Clear error when switching tabs
+                }}
                 className={`flex-1 py-2.5 text-sm font-medium transition-colors capitalize ${
                   role === r
                     ? "bg-primary/10 text-primary border-b-2 border-primary"
@@ -94,11 +115,14 @@ const Login = () => {
             <div className="relative">
               <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
+                id="login-email"
                 placeholder="name@example.com"
                 className="pl-10"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
+                required
               />
             </div>
           </div>
@@ -107,16 +131,19 @@ const Login = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Password</Label>
-              <button className="text-xs text-primary hover:underline font-medium">Forgot password?</button>
+              <button type="button" className="text-xs text-primary hover:underline font-medium">Forgot password?</button>
             </div>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
+                id="login-password"
                 placeholder="••••••••"
                 className="pl-10 pr-10"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
+                required
               />
               <button
                 type="button"
@@ -138,8 +165,21 @@ const Login = () => {
 
           {/* Submit */}
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button type="submit" className="w-full h-12 text-base font-semibold gap-2" size="lg">
-            Login to Portal <LogIn className="w-5 h-5" />
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-semibold gap-2"
+            size="lg"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" /> Logging in...
+              </>
+            ) : (
+              <>
+                Login as {role === "admin" ? "Admin" : "Student"} <LogIn className="w-5 h-5" />
+              </>
+            )}
           </Button>
 
           {/* Divider */}
