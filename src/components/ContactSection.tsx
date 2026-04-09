@@ -23,6 +23,19 @@ const ContactSection = () => {
       toast({ title: "Error", description: "Please fill all required fields", variant: "destructive" });
       return;
     }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({ title: "Error", description: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
+
+    // Validate message length
+    if (formData.message.trim().length < 5) {
+      toast({ title: "Error", description: "Message must be at least 5 characters long", variant: "destructive" });
+      return;
+    }
     
     setLoading(true);
     try {
@@ -30,10 +43,10 @@ const ContactSection = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          message: `Interested in: ${formData.course}\n\n${formData.message}`,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          message: `Interested in: ${formData.course}\n\n${formData.message.trim()}`,
         }),
       });
       const data = await res.json();

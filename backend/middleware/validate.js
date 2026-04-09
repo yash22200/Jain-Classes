@@ -41,14 +41,14 @@ const validateEnquiry = [
   body("email").trim().isEmail().withMessage("Valid email is required"),
   body("phone")
     .trim()
-    .matches(/^[0-9]{10}$/)
-    .withMessage("Phone must be a valid 10-digit number"),
+    .matches(/^[+]?[0-9\s\-()]{10,}$/)
+    .withMessage("Phone must be a valid phone number"),
   body("message")
     .trim()
     .notEmpty()
     .withMessage("Message is required")
-    .isLength({ min: 10, max: 1000 })
-    .withMessage("Message must be between 10 and 1000 characters"),
+    .isLength({ min: 5, max: 1000 })
+    .withMessage("Message must be between 5 and 1000 characters"),
   handleValidationErrors,
 ];
 
