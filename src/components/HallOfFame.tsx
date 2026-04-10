@@ -31,7 +31,7 @@ const HallOfFame = () => {
             percentage: 99.2,
             year: "2024",
             exam: "10th Board",
-            imageUrl: "https://drive.google.com/file/d/1YTwNOwMZCWUz7yq7oy-oiyODeB8Nr3zX",
+            imageUrl: "https://res.cloudinary.com/ddzgwwpvm/image/upload/v1775804775/4_ux4ccb.avif",
           },
           {
             id: "2",
@@ -39,7 +39,7 @@ const HallOfFame = () => {
             percentage: 98.1,
             year: "2024",
             exam: "10th Board",
-            imageUrl: "https://drive.google.com/file/d/1_jXfBjqkxZGgetHmlEcWgFyZEmXItpVB",
+            imageUrl: "https://res.cloudinary.com/ddzgwwpvm/image/upload/q_auto/f_auto/v1775804775/3_qhwisq.avif",
           },
           {
             id: "3",
@@ -47,7 +47,7 @@ const HallOfFame = () => {
             percentage: 97.8,
             year: "2024",
             exam: "10th Board",
-            imageUrl: "https://drive.google.com/file/d/1wzRq1L1MbOIbkrGnLVARQ1PW1jrBsMCU",
+            imageUrl: "https://res.cloudinary.com/ddzgwwpvm/image/upload/q_auto/f_auto/v1775804709/1_urrths.jpg",
           },
           {
             id: "4",
@@ -55,7 +55,7 @@ const HallOfFame = () => {
             percentage: 98.5,
             year: "2024",
             exam: "10th Board",
-            imageUrl: "https://drive.google.com/file/d/1e-inigv4TXhmU1AJ8ID8eXyRzKoh6g8n",
+            imageUrl: "https://res.cloudinary.com/ddzgwwpvm/image/upload/q_auto/f_auto/v1775804775/2_tmxtfn.avif",
           },
         ]);
       } finally {
