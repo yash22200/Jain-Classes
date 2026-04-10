@@ -86,6 +86,7 @@ interface Question {
   questionText: string;
   options: string[];
   correctOption: number;
+  correctAnswer: string;
 }
 
 interface Quiz {
@@ -122,7 +123,7 @@ const AdminDashboard = () => {
   });
   const [newResult, setNewResult] = useState({ studentId: "", subject: "", marks: "", totalMarks: "100" });
   const [newResource, setNewResource] = useState({ title: "", url: "", description: "", type: "video", grade: "" });
-  const [newQuiz, setNewQuiz] = useState({ title: "", description: "", course: "", questions: [{ questionText: "", options: ["", "", "", ""], correctOption: 0 }] });
+  const [newQuiz, setNewQuiz] = useState({ title: "", description: "", course: "", questions: [{ questionText: "", options: ["", "", "", ""], correctOption: 0, correctAnswer: "" }] });
 
   useEffect(() => {
     if (token) {
@@ -342,8 +343,8 @@ const AdminDashboard = () => {
 
   const addQuiz = async () => {
     if (newQuiz.title && newQuiz.questions.length > 0) {
-      if (newQuiz.questions.some(q => !q.questionText || q.options.some(opt => !opt))) {
-        return toast({ title: "Error", description: "Please fill all question texts and options", variant: "destructive" });
+      if (newQuiz.questions.some(q => !q.questionText || q.options.some(opt => !opt) || !q.correctAnswer)) {
+        return toast({ title: "Error", description: "Please fill all question texts, options, and correct answer", variant: "destructive" });
       }
       try {
         const res = await fetch(`${API_URL}/api/admin/quizzes`, {
@@ -357,7 +358,7 @@ const AdminDashboard = () => {
         const data = await res.json();
         if (data.success) {
           toast({ title: "Success", description: "Quiz created successfully" });
-          setNewQuiz({ title: "", description: "", course: "", questions: [{ questionText: "", options: ["", "", "", ""], correctOption: 0 }] });
+          setNewQuiz({ title: "", description: "", course: "", questions: [{ questionText: "", options: ["", "", "", ""], correctOption: 0, correctAnswer: "" }] });
           fetchData(); 
         } else {
           toast({ title: "Error", description: data.message, variant: "destructive" });
@@ -1202,7 +1203,7 @@ const AdminDashboard = () => {
                           size="sm"
                           onClick={() => setNewQuiz({
                             ...newQuiz, 
-                            questions: [...newQuiz.questions, { questionText: "", options: ["", "", "", ""], correctOption: 0 }]
+                            questions: [...newQuiz.questions, { questionText: "", options: ["", "", "", ""], correctOption: 0, correctAnswer: "" }]
                           })}
                         >
                           <Plus className="w-4 h-4 mr-2" /> Add Question
@@ -1259,6 +1260,19 @@ const AdminDashboard = () => {
                                 />
                               </div>
                             ))}
+                          </div>
+                          <div className="mt-3 pt-3 border-t">
+                            <Label className="text-sm font-medium">Correct Answer</Label>
+                            <Input
+                              placeholder="Enter the correct answer text"
+                              value={q.correctAnswer}
+                              onChange={(e) => {
+                                const updated = [...newQuiz.questions];
+                                updated[qIndex].correctAnswer = e.target.value;
+                                setNewQuiz({ ...newQuiz, questions: updated });
+                              }}
+                              className="mt-2"
+                            />
                           </div>
                         </div>
                       ))}

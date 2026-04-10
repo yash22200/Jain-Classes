@@ -68,6 +68,7 @@ interface Resource {
 interface Question {
   questionText: string;
   options: string[];
+  correctAnswer?: string;
 }
 
 interface Quiz {
@@ -691,11 +692,48 @@ const StudentDashboard = () => {
                 </div>
 
                 {quizScore ? (
-                  <div className="text-center py-10 space-y-4">
-                    <Award className="w-16 h-16 mx-auto text-primary" />
-                    <h2 className="text-2xl font-bold">Quiz Completed!</h2>
-                    <p className="text-lg">Your score: <span className="font-bold text-primary">{quizScore.score}</span> / {quizScore.total}</p>
-                    <div className="mt-6 flex justify-center">
+                  <div className="space-y-6">
+                    <div className="text-center py-10 space-y-4 bg-primary/5 rounded-lg p-6">
+                      <Award className="w-16 h-16 mx-auto text-primary" />
+                      <h2 className="text-2xl font-bold">Quiz Completed!</h2>
+                      <p className="text-lg">Your score: <span className="font-bold text-primary">{quizScore.score}</span> / {quizScore.total}</p>
+                      <p className="text-sm text-muted-foreground">Percentage: {((quizScore.score / quizScore.total) * 100).toFixed(1)}%</p>
+                    </div>
+
+                    <div className="border-t pt-6">
+                      <h3 className="text-lg font-bold mb-4">Answer Review</h3>
+                      {activeQuiz.questions.map((q, qIndex) => {
+                        const isCorrect = quizAnswers[qIndex] !== undefined;
+                        return (
+                          <div key={qIndex} className="mb-6 p-4 border rounded bg-card">
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="font-semibold text-md">{qIndex + 1}. {q.questionText}</h4>
+                              <span className={`text-xs font-medium px-2 py-1 rounded ${
+                                quizAnswers[qIndex] !== undefined 
+                                  ? "bg-green-100 text-green-700" 
+                                  : "bg-red-100 text-red-700"
+                              }`}>
+                                {quizAnswers[qIndex] !== undefined ? "✓ Answered" : "✗ Skipped"}
+                              </span>
+                            </div>
+                            <div className="space-y-2">
+                              {quizAnswers[qIndex] !== undefined && (
+                                <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+                                  <p className="text-muted-foreground font-medium mb-1">Your Answer:</p>
+                                  <p className="text-foreground">{q.options[quizAnswers[qIndex]]}</p>
+                                </div>
+                              )}
+                              <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
+                                <p className="text-muted-foreground font-medium mb-1">Correct Answer:</p>
+                                <p className="text-foreground font-semibold">{q.correctAnswer || q.options[0]}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex justify-center pt-4">
                       <Button onClick={() => setActiveQuiz(null)}>Take Another Quiz</Button>
                     </div>
                   </div>
