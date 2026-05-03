@@ -78,14 +78,14 @@ const ContactSection = () => {
               <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div>
                 <h4 className="font-semibold text-sm">Our Main Center</h4>
-                <p className="text-sm text-muted-foreground">143 Academic Avenue, Educational Zone, Mumbai, MH 400001</p>
+                <p className="text-sm text-muted-foreground">Type 5, HAL Ojhar Township, Near Gas Agency, Nashik</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
               <Phone className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div>
                 <h4 className="font-semibold text-sm">Phone & Email</h4>
-                <p className="text-sm text-muted-foreground">+91 98164 43210<br />info@jainclasses.edu</p>
+                <p className="text-sm text-muted-foreground">+91 8806993969<br />geshu123@gmail.com</p>
               </div>
             </div>
           </div>
