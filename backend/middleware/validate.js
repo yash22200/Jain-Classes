@@ -18,12 +18,11 @@ const validateRegister = [
   body("name").trim().notEmpty().withMessage("Name is required").isLength({ min: 2 }).withMessage("Name must be at least 2 characters"),
   body("email").trim().isEmail().withMessage("Valid email is required"),
   body("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters")
-    .matches(/[A-Z]/)
-    .withMessage("Password must contain at least one uppercase letter")
-    .matches(/[0-9]/)
-    .withMessage("Password must contain at least one number"),
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
+  body("confirmPassword")
+    .notEmpty()
+    .withMessage("Please confirm your password"),
   body("role").optional().isIn(["student", "admin"]).withMessage("Invalid role"),
   handleValidationErrors,
 ];

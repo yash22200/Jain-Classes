@@ -21,7 +21,7 @@ const seed = async () => {
     // ════════════════════════════════════════════════════════════════
     await User.deleteOne({ email: "admin@jain.com" });
 
-    const adminPassword = "Admin@12345";
+    const adminPassword = "admin123";
 
     const admin = await User.create({
       name: "Admin User",
@@ -41,9 +41,9 @@ const seed = async () => {
     // 2. CREATE TEST STUDENT ACCOUNTS
     // ════════════════════════════════════════════════════════════════
     const testStudents = [
-      { name: "Aarav Kumar", email: "aarav@student.com", password: "Student@123", class: "8th" },
-      { name: "Diya Sharma", email: "diya@student.com", password: "Student@123", class: "9th" },
-      { name: "Rohan Verma", email: "rohan@student.com", password: "Student@123", class: "10th" },
+      { name: "Aarav Kumar", email: "aarav@student.com", password: "aarav123", class: "8th" },
+      { name: "Diya Sharma", email: "diya@student.com", password: "diya123", class: "9th" },
+      { name: "Rohan Verma", email: "rohan@student.com", password: "rohan123", class: "10th" },
     ];
 
     console.log("👥 CREATING TEST STUDENT ACCOUNTS");
