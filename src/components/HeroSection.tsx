@@ -9,7 +9,7 @@ const HeroSection = () => (
       <div>
         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent text-accent-foreground text-xs font-semibold mb-6">
           <span className="w-2 h-2 rounded-full bg-success" />
-          Admissions Open for 8th, 9th & 10th Std — 2024-25
+          Admissions Open for 8th, 9th & 10th Std — 2026-27
         </span>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
